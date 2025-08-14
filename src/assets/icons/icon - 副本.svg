@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <!-- 背景透明 -->
+  <rect width="120" height="120" fill="transparent"/>
+
+  <!-- 锁主体（白色填充，黑色描边） -->
+  <rect x="35" y="50" width="50" height="40" rx="5"
+        fill="white" stroke="black" stroke-width="2"/>
+
+  <!-- 锁内部暗区（表示锁芯） -->
+  <rect x="40" y="50" width="40" height="30" rx="5" fill="black"/>
+
+  <!-- 锁孔 -->
+  <circle cx="60" cy="65" r="5" fill="black"/>
+
+  <!-- "mm" 文字（白色，位于暗区上） -->
+  <text x="60" y="72" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">mm</text>
+
+  <!-- 密码星号装饰（灰色/黑色） -->
+  <text x="60" y="100" font-family="Arial, sans-serif" font-size="20" fill="black" text-anchor="middle">*</text>
+  <text x="30" y="30" font-family="Arial, sans-serif" font-size="16" fill="black" opacity="0.7">*</text>
+  <text x="90" y="30" font-family="Arial, sans-serif" font-size="16" fill="black" opacity="0.7">*</text>
+
+  <!-- 开锁标志：大尺寸 90° 折线（类似门框打开） -->
+  <!-- 从 (50,50) 向上到 (50,20)，再向右到 (80,20) -->
+  <path d="M50 50 L50 20 L80 20" 
+        stroke="black" 
+        stroke-width="4" 
+        fill="none" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" />
+
+  <!-- 可选：轻微阴影或断开感（增强立体感） -->
+  <!-- 在锁体顶部留出空隙，表示分离 -->
+</svg>

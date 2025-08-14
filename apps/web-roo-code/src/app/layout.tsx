@@ -1,6 +1,5 @@
 import React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
 import Script from "next/script"
 
 import { Providers } from "@/components/providers"
@@ -8,8 +7,6 @@ import { Providers } from "@/components/providers"
 import Shell from "./shell"
 
 import "./globals.css"
-
-const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
 	title: "Roo Code – Your AI-Powered Dev Team in VS Code",
@@ -52,7 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css"
 				/>
 			</head>
-			<body className={inter.className}>
+			<body>
 				{/* Google tag (gtag.js) */}
 				<Script src="https://www.googletagmanager.com/gtag/js?id=AW-17391954825" strategy="afterInteractive" />
 				<Script id="google-analytics" strategy="afterInteractive">

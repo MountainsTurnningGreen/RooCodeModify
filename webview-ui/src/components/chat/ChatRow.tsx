@@ -122,6 +122,7 @@ export const ChatRowContent = ({
 	const [editedContent, setEditedContent] = useState("")
 	const [editMode, setEditMode] = useState<Mode>(mode || "code")
 	const [editImages, setEditImages] = useState<string[]>([])
+	const [isLiked, setIsLiked] = useState(false)
 	const { copyWithFeedback } = useCopyToClipboard()
 
 	// Handle message events for image selection during edit mode
@@ -604,7 +605,7 @@ export const ChatRowContent = ({
 						</div>
 						<CodeAccordian
 							code={tool.content}
-							language="markdown"
+							language="``"
 							isLoading={message.partial}
 							isExpanded={isExpanded}
 							onToggleExpand={handleToggleExpand}
@@ -677,7 +678,7 @@ export const ChatRowContent = ({
 						<CodeAccordian
 							path={tool.path}
 							code={tool.content}
-							language="markdown"
+							language="``"
 							isExpanded={isExpanded}
 							onToggleExpand={handleToggleExpand}
 						/>
@@ -1042,7 +1043,7 @@ export const ChatRowContent = ({
 								<div style={{ marginTop: "10px" }}>
 									<CodeAccordian
 										code={safeJsonParse<any>(message.text)?.request}
-										language="markdown"
+										language="``"
 										isExpanded={true}
 										onToggleExpand={handleToggleExpand}
 									/>
@@ -1054,8 +1055,22 @@ export const ChatRowContent = ({
 					return null // we should never see this message type
 				case "text":
 					return (
-						<div>
+						<div className="flex flex-col">
 							<Markdown markdown={message.text} partial={message.partial} />
+							<div className="mt-2 flex justify-end">
+								<Button
+									variant="ghost"
+									size="sm"
+									className={`h-6 px-2 text-xs ${isLiked ? "opacity-100 text-green-500" : "opacity-50 hover:opacity-100"}`}
+									onClick={(e) => {
+										e.stopPropagation()
+										setIsLiked(!isLiked)
+										// TODO: 实现实际的点赞功能，如发送到后端
+										console.log(`${isLiked ? "取消点赞" : "点赞"}消息`, message.ts)
+									}}>
+									{isLiked ? "👍 已满意" : "👍 满意"}
+								</Button>
+							</div>
 						</div>
 					)
 				case "user_feedback":
