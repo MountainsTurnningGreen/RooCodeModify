@@ -210,6 +210,7 @@ export interface WebviewMessage {
 		| "deleteCommand"
 		| "createCommand"
 		| "insertTextIntoTextarea"
+		| "saveSessionFeedback"
 	text?: string
 	editedMessageContent?: string
 	tab?: "settings" | "history" | "mcp" | "modes" | "chat" | "marketplace" | "account"
@@ -317,3 +318,10 @@ export type WebViewMessagePayload =
 	| IndexClearedPayload
 	| InstallMarketplaceItemWithParametersPayload
 	| UpdateTodoListPayload
+	| SaveSessionFeedbackPayload
+
+export interface SaveSessionFeedbackPayload {
+	feedback: "positive" | "negative"
+	timestamp: number
+	messageTs: number
+}

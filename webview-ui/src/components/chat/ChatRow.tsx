@@ -43,7 +43,6 @@ import { ProgressIndicator } from "./ProgressIndicator"
 import { Markdown } from "./Markdown"
 import { CommandExecution } from "./CommandExecution"
 import { CommandExecutionError } from "./CommandExecutionError"
-import { AutoApprovedRequestLimitWarning } from "./AutoApprovedRequestLimitWarning"
 import { CondenseContextErrorRow, CondensingContextRow, ContextCondenseRow } from "./ContextCondenseRow"
 import CodebaseSearchResultsDisplay from "./CodebaseSearchResultsDisplay"
 
@@ -122,7 +121,7 @@ export const ChatRowContent = ({
 	const [editedContent, setEditedContent] = useState("")
 	const [editMode, setEditMode] = useState<Mode>(mode || "code")
 	const [editImages, setEditImages] = useState<string[]>([])
-	const [isLiked, setIsLiked] = useState(false)
+	const [isLiked, setIsLiked] = useState<boolean | undefined>(undefined)
 	const { copyWithFeedback } = useCopyToClipboard()
 
 	// Handle message events for image selection during edit mode
@@ -1057,18 +1056,59 @@ export const ChatRowContent = ({
 					return (
 						<div className="flex flex-col">
 							<Markdown markdown={message.text} partial={message.partial} />
-							<div className="mt-2 flex justify-end">
+
+							<div className="mt-2 flex justify-end space-x-2">
 								<Button
 									variant="ghost"
 									size="sm"
-									className={`h-6 px-2 text-xs ${isLiked ? "opacity-100 text-green-500" : "opacity-50 hover:opacity-100"}`}
+									className={`h-6 px-2 text-xs ${isLiked === false ? "opacity-100 text-red-500" : "opacity-50 hover:opacity-100"}`}
 									onClick={(e) => {
 										e.stopPropagation()
-										setIsLiked(!isLiked)
-										// TODO: 实现实际的点赞功能，如发送到后端
-										console.log(`${isLiked ? "取消点赞" : "点赞"}消息`, message.ts)
+										// 设置为不满意状态
+										setIsLiked(false)
+
+										// 发送负面反馈到后端
+										vscode.postMessage({
+											type: "saveSessionFeedback",
+											payload: {
+												feedback: "negative",
+												timestamp: Date.now(),
+												messageTs: message.ts,
+											},
+										})
+										console.log("发送反馈:", {
+											feedback: "negative",
+											timestamp: Date.now(),
+											messageTs: message.ts,
+										})
 									}}>
-									{isLiked ? "👍 已满意" : "👍 满意"}
+									{isLiked === false ? "👎 已不满意" : "👎 不满意"}
+								</Button>
+								<Button
+									variant="ghost"
+									size="sm"
+									className={`h-6 px-2 text-xs ${isLiked === true ? "opacity-100 text-green-500" : "opacity-50 hover:opacity-100"}`}
+									onClick={(e) => {
+										e.stopPropagation()
+										// 设置为满意状态
+										setIsLiked(true)
+
+										// 发送正面反馈到后端
+										vscode.postMessage({
+											type: "saveSessionFeedback",
+											payload: {
+												feedback: "positive",
+												timestamp: Date.now(),
+												messageTs: message.ts,
+											},
+										})
+										console.log("发送反馈:", {
+											feedback: "positive",
+											timestamp: Date.now(),
+											messageTs: message.ts,
+										})
+									}}>
+									{isLiked === true ? "👍 已满意" : "👍 满意"}
 								</Button>
 							</div>
 						</div>
@@ -1353,11 +1393,6 @@ export const ChatRowContent = ({
 							/>
 						</>
 					)
-				case "auto_approval_max_req_reached": {
-					return <AutoApprovedRequestLimitWarning message={message} />
-				}
-				default:
-					return null
 			}
 	}
 }

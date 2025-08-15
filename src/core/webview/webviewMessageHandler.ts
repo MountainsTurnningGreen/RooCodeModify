@@ -2604,5 +2604,126 @@ export const webviewMessageHandler = async (
 			}
 			break
 		}
+
+		case "saveSessionFeedback": {
+			// 处理满意度反馈消息
+			console.log("收到满意度反馈消息:", message.payload)
+			if (message.payload) {
+				const { feedback, timestamp, messageTs } = message.payload as {
+					feedback: "positive" | "negative"
+					timestamp: number
+					messageTs: number
+				}
+
+				console.log("处理反馈数据:", { feedback, timestamp, messageTs })
+
+				// 获取当前任务的完整消息历史
+				const currentCline = provider.getCurrentCline()
+				if (currentCline) {
+					// 获取当前任务的所有消息
+					const allMessages = currentCline.clineMessages
+					console.log("当前任务消息数量:", allMessages.length)
+
+					// 查找当前消息在消息列表中的位置
+					const messageIndex = allMessages.findIndex((msg) => msg.ts === messageTs)
+					console.log("找到消息索引:", messageIndex)
+
+					// 获取当前对话轮次的消息（从用户消息到当前AI回复）
+					let conversationRound: ClineMessage[] = []
+					if (messageIndex >= 0) {
+						// 向前查找，找到用户消息的开始
+						let startIndex = 0 // 默认从第一条消息开始
+
+						// 从当前消息索引向前查找对话的开始位置
+						for (let i = messageIndex; i >= 0; i--) {
+							const msg = allMessages[i]
+
+							// 如果是用户反馈消息，这就是对话的开始
+							if (msg.say === "user_feedback") {
+								startIndex = i
+								break
+							}
+
+							// 如果是完成结果消息，这也是对话的开始
+							if (msg.ask === "completion_result") {
+								startIndex = i
+								break
+							}
+
+							// 如果是followup类型的消息，也可能是对话的开始
+							if (msg.ask === "followup") {
+								startIndex = i
+								break
+							}
+
+							// 如果是第一条消息，直接作为对话开始
+							if (i === 0) {
+								startIndex = i
+								break
+							}
+						}
+
+						// 获取从开始到当前消息的所有消息
+						conversationRound = allMessages.slice(startIndex, messageIndex + 1)
+						console.log(
+							"识别的对话轮次:",
+							conversationRound.map((msg, index) => ({
+								index: startIndex + index,
+								type: msg.type,
+								ask: msg.ask,
+								say: msg.say,
+								text: msg.text?.substring(0, 50) + (msg.text && msg.text.length > 50 ? "..." : ""),
+								ts: msg.ts,
+							})),
+						)
+					} else {
+						// 如果找不到特定消息，发送所有消息
+						conversationRound = [...allMessages]
+					}
+
+					// 记录反馈信息
+					console.log("用户满意度反馈:", {
+						feedback,
+						timestamp,
+						messageTs,
+						conversationRound: conversationRound.map((msg) => ({
+							type: msg.type,
+							ask: msg.ask,
+							say: msg.say,
+							text: msg.text,
+							ts: msg.ts,
+						})),
+					})
+
+					// 这里可以将反馈信息保存到文件或发送到远程服务器
+					// 示例：保存到文件
+					try {
+						const feedbackData = {
+							feedback,
+							timestamp,
+							messageTs,
+							conversationRound,
+							taskId: currentCline.taskId,
+						}
+
+						// 可以将反馈数据保存到文件或发送到服务器
+						// await saveFeedbackToFile(feedbackData)
+
+						// 发送确认消息回前端
+						await provider.postMessageToWebview({
+							type: "action",
+							action: "chatButtonClicked", // 或者其他适当的消息类型
+						})
+					} catch (error) {
+						console.error("保存反馈信息时出错:", error)
+					}
+				} else {
+					console.log("未找到当前任务实例")
+				}
+			} else {
+				console.log("反馈消息没有 payload 数据")
+			}
+			break
+		}
 	}
 }

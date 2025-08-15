@@ -121,6 +121,7 @@ export interface ExtensionMessage {
 		| "showEditMessageDialog"
 		| "commands"
 		| "insertTextIntoTextarea"
+		| "saveSessionFeedback" // 添加新的消息类型
 	text?: string
 	payload?: any // Add a generic payload for now, can refine later
 	action?:

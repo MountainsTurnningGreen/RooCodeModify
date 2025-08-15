@@ -10,7 +10,7 @@ type AutoApprovedRequestLimitWarningProps = {
 	message: ClineMessage
 }
 
-export const AutoApprovedRequestLimitWarning = memo(({ message }: AutoApprovedRequestLimitWarningProps) => {
+export const _AutoApprovedRequestLimitWarning = memo(({ message }: AutoApprovedRequestLimitWarningProps) => {
 	const [buttonClicked, setButtonClicked] = useState(false)
 	const { count, type = "requests" } = JSON.parse(message.text ?? "{}")
 
