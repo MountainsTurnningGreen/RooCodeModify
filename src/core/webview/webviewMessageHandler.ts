@@ -45,6 +45,8 @@ import { openMention } from "../mentions"
 import { TelemetrySetting } from "../../shared/TelemetrySetting"
 import { getWorkspacePath } from "../../utils/path"
 import { ensureSettingsDirectoryExists } from "../../utils/globalContext"
+import { sendFeedbackToRemoteServer, FeedbackData } from "../utils/feedbackSender"
+
 import { Mode, defaultModeSlug } from "../../shared/modes"
 import { getModels, flushModels } from "../../api/providers/fetchers/modelCache"
 import { GetModelsOptions } from "../../shared/api"
@@ -2695,19 +2697,52 @@ export const webviewMessageHandler = async (
 						})),
 					})
 
-					// 这里可以将反馈信息保存到文件或发送到远程服务器
-					// 示例：保存到文件
-					try {
-						const feedbackData = {
-							feedback,
-							timestamp,
-							messageTs,
-							conversationRound,
-							taskId: currentCline.taskId,
-						}
+					// 准备反馈数据
+					const feedbackData: FeedbackData = {
+						feedback,
+						timestamp,
+						messageTs,
+						conversationRound,
+						taskId: currentCline.taskId,
+						// 添加额外的元数据
+						user: vscode.env.machineId, // 匿名用户ID
+						extensionVersion: require("../../package.json").version,
+						timestampISO: new Date(timestamp).toISOString(),
+					}
 
-						// 可以将反馈数据保存到文件或发送到服务器
-						// await saveFeedbackToFile(feedbackData)
+					// 保存到本地文件
+					try {
+						const fs = require("fs")
+						const path = require("path")
+						const os = require("os")
+
+						// 确保有一个目录来保存反馈文件
+						const feedbackDir = path.join(os.homedir(), ".roo-code", "feedback")
+						fs.mkdirSync(feedbackDir, { recursive: true })
+
+						// 创建一个唯一的文件名
+						const fileName = `feedback_${Date.now()}_${messageTs}.json`
+						const filePath = path.join(feedbackDir, fileName)
+
+						// 将数据写入 JSON 文件
+						fs.writeFileSync(filePath, JSON.stringify(feedbackData, null, 2))
+
+						console.log(`反馈数据已保存到: ${filePath}`)
+
+						// 尝试发送到远程服务器（如果配置了）
+						// 获取服务器配置URL（可以从环境变量或配置中获取）
+						const remoteServerUrl = process.env.ROO_CODE_FEEDBACK_SERVER_URL || "mongodb://127.0.0.1:27017"
+						sendFeedbackToRemoteServer(feedbackData, remoteServerUrl)
+							.then((success) => {
+								if (success) {
+									console.log("反馈数据成功发送到远程服务器")
+								} else {
+									console.warn("发送反馈到远程服务器失败")
+								}
+							})
+							.catch((err) => {
+								console.warn("发送反馈到远程服务器时发生错误:", err)
+							})
 
 						// 发送确认消息回前端
 						await provider.postMessageToWebview({

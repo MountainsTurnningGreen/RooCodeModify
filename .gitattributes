@@ -18,3 +18,15 @@ src/i18n/locales/en/** linguist-generated=false
 webview-ui/src/i18n/locales/en/** linguist-generated=false
 
 # This approach uses gitattributes' last-match-wins rule to exclude English while including all other locales
+
+# 换行符处理规则
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.html text eol=lf
+*.css text eol=lf

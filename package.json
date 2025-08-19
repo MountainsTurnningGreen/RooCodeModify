@@ -59,5 +59,9 @@
 			"bluebird": ">=3.7.2",
 			"node-ipc": "~11.1.0"
 		}
+	},
+	"dependencies": {
+		"@types/mongodb": "^4.0.7",
+		"mongodb": "^6.18.0"
 	}
 }
