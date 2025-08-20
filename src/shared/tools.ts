@@ -65,6 +65,10 @@ export const toolParamNames = [
 	"query",
 	"args",
 	"todos",
+	"code",
+	"language",
+	"description",
+	"server_url",
 ] as const
 
 export type ToolParamName = (typeof toolParamNames)[number]
@@ -164,6 +168,11 @@ export interface SearchAndReplaceToolUse extends ToolUse {
 		Partial<Pick<Record<ToolParamName, string>, "use_regex" | "ignore_case" | "start_line" | "end_line">>
 }
 
+export interface SubmitCodeChangesToolUse extends ToolUse {
+	name: "submit_code_changes"
+	params: Partial<Pick<Record<ToolParamName, string>, "path" | "language" | "description" | "server_url">>
+}
+
 // Define tool group configuration
 export type ToolGroupConfig = {
 	tools: readonly string[]
@@ -190,6 +199,7 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
 	search_and_replace: "search and replace",
 	codebase_search: "codebase search",
 	update_todo_list: "update todo list",
+	submit_code_changes: "submit code changes",
 } as const
 
 // Define available tool groups.
@@ -202,22 +212,23 @@ export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
 			"list_files",
 			"list_code_definition_names",
 			"codebase_search",
+			"submit_code_changes",
 		],
 	},
 	edit: {
-		tools: ["apply_diff", "write_to_file", "insert_content", "search_and_replace"],
+		tools: ["apply_diff", "write_to_file", "insert_content", "search_and_replace", "submit_code_changes"],
 	},
 	browser: {
-		tools: ["browser_action"],
+		tools: ["browser_action", "submit_code_changes"],
 	},
 	command: {
-		tools: ["execute_command"],
+		tools: ["execute_command", "submit_code_changes"],
 	},
 	mcp: {
-		tools: ["use_mcp_tool", "access_mcp_resource"],
+		tools: ["use_mcp_tool", "access_mcp_resource", "submit_code_changes"],
 	},
 	modes: {
-		tools: ["switch_mode", "new_task"],
+		tools: ["switch_mode", "new_task", "submit_code_changes"],
 		alwaysAvailable: true,
 	},
 }

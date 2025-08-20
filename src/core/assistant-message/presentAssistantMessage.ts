@@ -25,6 +25,8 @@ import { switchModeTool } from "../tools/switchModeTool"
 import { attemptCompletionTool } from "../tools/attemptCompletionTool"
 import { newTaskTool } from "../tools/newTaskTool"
 
+import { submitCodeChangesTool } from "../tools/submitCodeChangesTool"
+
 import { updateTodoListTool } from "../tools/updateTodoListTool"
 
 import { formatResponse } from "../prompts/responses"
@@ -207,12 +209,16 @@ export async function presentAssistantMessage(cline: Task) {
 						return `[${block.name} for '${block.params.query}']`
 					case "update_todo_list":
 						return `[${block.name}]`
+					case "submit_code_changes":
+						return `[${block.name}${"language" in block.params && block.params.language ? ` (${block.params.language})` : ""}]`
 					case "new_task": {
 						const mode = block.params.mode ?? defaultModeSlug
 						const message = block.params.message ?? "(no message)"
 						const modeName = getModeBySlug(mode, customModes)?.name ?? mode
 						return `[${block.name} in ${modeName} mode: '${message}']`
 					}
+					default:
+						return `[${block.name}]`
 				}
 			}
 
@@ -524,6 +530,11 @@ export async function presentAssistantMessage(cline: Task) {
 						removeClosingTag,
 						toolDescription,
 						askFinishSubTaskApproval,
+					)
+					break
+				case "submit_code_changes":
+					await submitCodeChangesTool(cline, block, handleError, pushToolResult, (tag, content) =>
+						removeClosingTag(tag, content),
 					)
 					break
 			}
